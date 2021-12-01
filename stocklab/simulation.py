@@ -28,13 +28,16 @@ class Strategy(ABC):
     def setup_data(self) -> pd.DataFrame: pass
 
     @abstractmethod
-    def decision(self, *args, **kwargs) -> str: pass
+    def decision(self, *args, **kwargs) -> tuple: pass
 
     @abstractmethod
     def should_buy(self, *args, **kwargs) -> bool: pass
 
     @abstractmethod
     def should_sell(self, *args, **kwargs) -> bool: pass
+
+    @abstractmethod
+    def fees(self) -> float: pass
 
 
 class MidDay(Strategy):
@@ -48,8 +51,6 @@ class MidDay(Strategy):
     def __init__(self, *args, **kwargs):
         self.row_data = kwargs["row_data"]
         self.df = self.setup_data()
-        self.profit = 0
-        self.current_price = 0
 
     def setup_data(self):
         df = self.row_data.copy(deep=True)
@@ -65,33 +66,32 @@ class MidDay(Strategy):
                 df.loc[idx + 1, 'Buy'] = 1
         return df
 
-    def decision(self, row, state, current_price):
+    def decision(self, row, state):
 
-        self.current_price = current_price
-        self.profit = state.cal_profit(current_price)
+        current_price = row["high"]
+        profit = state.profit_pct(current_price)
         if self.should_buy(row):
-            return ORDERS.buy
-        if self.should_sell(row):
-            return ORDERS.sell
-        return ORDERS.hold
+            return ORDERS.buy, current_price
+        if self.should_sell(profit):
+            return ORDERS.sell, current_price
+        return ORDERS.hold, current_price
 
     def should_buy(self, row) -> bool:
         if row["Buy"] == 1:
             return True
         return False
 
-    def should_sell(self, row) -> bool:
+    def should_sell(self, profit) -> bool:
         # take profit
-        if self.profit >= 0.01:
-            print("take profit")
-            print(self.profit)
+        if profit >= 0.04:
             return True
         # stop loss
-        if self.profit <= -0.01:
-            print("stop loss")
-            print(self.profit)
+        if profit <= -0.01:
             return True
         return False
+
+    def fees(self) -> float:
+        return 2.0
 
     @staticmethod
     def linear_reg(x, y):
@@ -103,30 +103,68 @@ class MidDay(Strategy):
 
 
 class State(object):
-    def __init__(self, balance):
+    def __init__(self, balance, fees):
         self.balance = balance
+        self.fees = fees
         self.holds = {"amount": 0, "price": 0}
+        self.trades = []
+        self.current_price = 0.0
 
-    def update_buy(self, price):
-        amount = self.balance // price
-        self.balance -= amount * price
-        self.holds["amount"] = amount
-        self.holds["price"] = price
+    def sell(self, price):
+        if self.can_sell:
+            self.current_price = price
+            self.balance += self.holds["amount"] * self.current_price - self.fees
+            amount = self.holds["amount"]
+            profile = self.get_profit - self.fees
+            self.holds["amount"] = 0
+            self.holds["price"] = 0
 
-    def update_sell(self, price):
-        self.balance += self.holds["amount"] * price
-        profit = self.cal_profit(price)
-        self.holds["amount"] = 0
-        self.holds["price"] = 0
-        return profit
+            trade = {"order": ORDERS.sell,
+                     "price": price,
+                     "amount": amount,
+                     "balance": self.balance,
+                     "assets": self.get_assets,
+                     "profit": profile}
 
-    def cal_profit(self, price):
-        return price * self.holds["amount"] - self.holds["price"] * self.holds["amount"]
+            print(trade)
+            self.trades.append(trade)
+            return trade
+        return False
 
-    def cal_assets(self, price):
+    def buy(self, price):
+        if self.can_buy:
+            self.current_price = price
+            amount = self.balance // self.current_price
+            self.balance -= amount * self.current_price
+            self.holds["amount"] = amount
+            self.holds["price"] = price
+
+            trade = {"order": ORDERS.buy,
+                     "price": price,
+                     "amount": amount,
+                     "balance": self.balance,
+                     "assets": self.get_assets,
+                     "profit": self.get_profit}
+            print(trade)
+            self.trades.append(trade)
+            return True
+        return False
+
+    def profit_pct(self, price):
+        new_balance = self.holds["amount"] * price + self.balance
+        prev_balance = self.holds["amount"] * self.holds["price"] + self.balance
+
+        return (new_balance - self.fees - prev_balance) / prev_balance
+
+    @property
+    def get_profit(self):
+        return self.current_price * self.holds["amount"] - self.holds["price"] * self.holds["amount"]
+
+    @property
+    def get_assets(self):
         if self.holds["amount"] == 0:
             return self.balance
-        return (self.holds["amount"] * price) + self.balance
+        return (self.holds["amount"] * self.current_price) + self.balance
 
     @property
     def can_buy(self):
@@ -144,22 +182,8 @@ class State(object):
 class Simulation:
     def __init__(self, balance, strategy):
         self.strategy = strategy
-        self.state = State(balance)
+        self.state = State(balance, strategy.fees())
         self.logger = pd.DataFrame({})
-
-    def buy(self, price):
-        if self.state.can_buy:
-            self.state.update_buy(price)
-            self.log("buy", price, self.state.holds["amount"])
-
-    def sell(self, price):
-        if self.state.can_sell:
-            amount = self.state.holds["amount"]
-            self.state.update_sell(price)
-            self.log("sell", price, amount)
-        else:
-            print("pass sell")
-            pass
 
     def log(self, op, price, amount):
         print_arg = f"{op}, {op} at= {price} | currant balance= {self.state.balance} | amount= {amount}"
@@ -167,13 +191,11 @@ class Simulation:
 
     def row_by_row(self):
         for _, row in self.strategy.df.iterrows():
-            price = row["high"]
-            decision = self.strategy.decision(row, self.state, price)
-
+            decision, price = self.strategy.decision(row, self.state)
             if decision == ORDERS.buy:
-                self.buy(price)
+                self.state.buy(price)
             elif decision == ORDERS.sell:
-                self.sell(price)
+                self.state.sell(price)
             else:
                 # Hold
                 pass
