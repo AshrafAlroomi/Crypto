@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import uuid
+from abc import ABC, abstractmethod
 
 """
 only for long positions 
@@ -9,14 +10,15 @@ one tik
 """
 
 
-class Strategy:
+class Strategy(ABC):
     def __init__(self):
-        self.sim = Simulation
         self.logs = {}
 
+    @abstractmethod
     def take_profit(self):
         pass
 
+    @abstractmethod
     def stop_loss(self):
         pass
 
@@ -69,6 +71,19 @@ class Simulation:
         print(print_arg)
         print("-" * 10)
 
+
+
+
+
+
+
+
+
+
+
+
+
+    """
     def run_sim(self, testPrices, pre, balance):
         # print(testPrices[0])
         # print('xxxxxxxxxxxx')
@@ -255,3 +270,4 @@ class multiSim():
         print('\n')
         print('sum of loss = ', sum(profit[profit < 0]), ' count = ', len(profit[profit < 0]))
         print('\n')
+"""
