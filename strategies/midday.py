@@ -7,7 +7,7 @@ from sklearn.linear_model import LinearRegression
 from stocklab.portfolio import Portfolio
 from stocklab.strategy import Strategy
 from stocklab.config import *
-from stocklab.order import Order
+from stocklab.order import Order, Orders
 
 
 class MidDay(Strategy):
@@ -79,13 +79,15 @@ class MidDay(Strategy):
 
 
 class MidDayMulti(Strategy):
-    STOP_LOSS = -0.02
-    TAKE_PROFIT = 0.03
+    STOP_LOSS = -0.01
+    TAKE_PROFIT = 0.01
     MID_DAY = 5
 
     def __init__(self, *args, **kwargs):
         self.price_index = COLS.high
+        self.score_index = COLS.score
         self.dates = kwargs["dates"]
+        self.state = None
         if "portfolio" in kwargs:
             self.portfolio = kwargs["portfolio"]
             self.setup_data()
@@ -95,26 +97,33 @@ class MidDayMulti(Strategy):
 
     def setup_data(self):
         for symbol in self.portfolio.symbols:
-            symbol.df["Buy"] = random.randint(0, 1)
+            symbol.df["Buy"] = [random.randint(0, 1) for _ in range(len(symbol.df))]
+            symbol.df["Score"] = [random.random() for _ in range(len(symbol.df))]
 
     def decision(self, state, date):
-        orders = []
+        orders = Orders()
+        self.state = state
         for hold in state.holds.HOLDS:
             price = hold.symbol.get_by_date(date, self.price_index)
             if price:
                 if self.should_sell(hold, price):
-                    order = Order(op=ORDERS.sell, hold=hold, price=price)
-                    orders.append(order)
+                    order = Order(op=ORDERS.sell, symbol=hold.symbol,
+                                  hold=hold, price=price, score=1.0)
+                    orders.add_order(order)
 
-        for symbol in self.portfolio.symbols - state.holds.HOLDS:
+        for symbol in self.portfolio.symbols - self.state.holds.symbols:
             if self.should_buy(symbol, date):
                 price = symbol.get_by_date(date, self.price_index)
+                score = symbol.get_by_date(date, self.score_index)
                 if price:
-                    order = Order(op=ORDERS.buy, symbol=symbol, price=price)
-                    orders.append(order)
+                    order = Order(op=ORDERS.buy, symbol=symbol,
+                                  price=price, score=score)
+                    orders.add_order(order)
         return orders
 
     def should_buy(self, symbol, date) -> bool:
+        if symbol in self.state.holds.symbols:
+            return False
         row = symbol.get_by_date(date, "Buy")
         if row == 1:
             return True

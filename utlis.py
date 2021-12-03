@@ -27,14 +27,6 @@ class CryptoData(object):
             return df
 
 
-def read_binance_data(path):
-    def to_date(date):
-        try:
-            return datetime.datetime.strptime(date, '%Y-%m-%d %I-%p')
-        except:
-            return datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
 
-    df = pd.read_csv(path, skiprows=1).iloc[::-1]
-    df.reset_index(inplace=True, drop=True)
-    df['date'] = df['date'].apply(lambda x: to_date(x))
-    return df
+
+

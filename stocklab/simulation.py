@@ -1,3 +1,4 @@
+import uuid
 from stocklab.config import *
 import pandas as pd
 from stocklab.portfolio import Symbols
@@ -15,7 +16,10 @@ class Hold:
 
 
 class Holds:
-    HOLDS = []
+    def __init__(self, holds=None):
+        if holds is None:
+            holds = []
+        self.HOLDS = holds
 
     def add(self, hold):
         self.HOLDS.append(hold)
@@ -32,6 +36,11 @@ class Holds:
                 return h
         raise f"no hold for {symbol}"
 
+    def get_symbols_list(self):
+        if self.HOLDS:
+            return self.symbols
+        return []
+
     @property
     def symbols(self):
         s = Symbols()
@@ -47,68 +56,139 @@ class Holds:
         return h
 
 
+class Trade:
+    def __init__(self, trade_type=ORDERS.buy):
+        self.id = uuid.uuid1().hex[:6]
+        self.order = None
+        self.state = None
+        self.profit = 0.0
+        self.trade_type = trade_type
+
+    def new(self, state, order):
+        self.state = state
+        self.order = order
+
+        if self.trade_type == ORDERS.buy:
+            # update balance after buy
+            self.state.balance -= self.order.hold.cost
+
+        elif self.trade_type == ORDERS.sell:
+
+            # calculate cost of trade
+            # calculate the profit after sell
+            order_cost = self.order.hold.amount * self.order.price
+            self.profit = order_cost - self.order.hold.cost
+            self.state.balance += order_cost
+
+        else:
+            raise ValueError
+
+    def __str__(self):
+        return self.to_dict
+
+    @property
+    def to_dict(self):
+        if self.trade_type == ORDERS.sell:
+            return {"score": self.order.score,
+                    "name": self.order.hold.symbol.name,
+                    "order": ORDERS.sell,
+                    "price": self.order.hold.unit_price,
+                    "amount": self.order.hold.amount,
+                    "balance": self.state.balance,
+                    "assets": self.state.get_assets,
+                    "profit": self.profit}
+
+        elif self.trade_type == ORDERS.buy:
+            return {"score": self.order.score,
+                    "name": self.order.symbol.name,
+                    "order": ORDERS.buy,
+                    "price": self.order.price,
+                    "amount": self.order.hold.amount,
+                    "balance": self.state.balance,
+                    "assets": self.state.get_assets,
+                    "profit": 0.0}
+        else:
+            raise NotImplementedError
+
+
+class Trades:
+    def __init__(self, trades=None):
+        if trades is None:
+            trades = []
+        self.TRADES = trades
+
+    def add(self, trade):
+        self.TRADES.append(trade)
+
+    def screen(self):
+        pass
+
+    def by_id(self, trade_id):
+        for trade in self.TRADES:
+            if trade.id == trade_id:
+                return trade
+        return False
+
+    def by_order(self, order):
+        for trade in self.TRADES:
+            if trade.order == order:
+                return trade
+        return False
+
+    def by_hold(self, hold):
+        for trade in self.TRADES:
+            if trade.hold == hold:
+                return trade
+        return False
+
+    @property
+    def to_df(self):
+        return pd.DataFrame([trade.to_dict for trade in self.TRADES])
+
+
 class State:
     def __init__(self, balance, fees):
         self.fees = fees
-        self.holds = Holds()
         self.balance = balance
-        self.trades = []
+        self.holds = Holds()
+        self.trades = Trades()
 
     def sell(self, order):
         if self.can_sell:
-            cost = order.hold.amount * order.price
-            profit = cost - order.hold.cost
-            self.balance += profit
+            # del hold
             self.holds.drop(order.hold)
-
-            trade = {
-                "name": order.hold.symbol.name,
-                "order": ORDERS.sell,
-                "price": order.hold.unit_price,
-                "amount": order.hold.amount,
-                "balance": self.balance,
-                "assets": self.get_assets,
-                "profit": profit}
-
+            # create trade
+            trade = Trade(ORDERS.sell)
+            trade.new(self, order)
             print(trade)
-            self.trades.append(trade)
-            return trade
+            self.trades.add(trade)
+            return True
         return False
 
     def buy(self, order):
         if self.can_buy:
-            amount = self.get_amount(order.symbol, order.price)
+            # get how many unit can buy
+            amount = order.get_amount(self.balance)
             if amount > 0:
+                # create hold
                 hold = Hold(order.symbol, amount, order.price)
                 self.holds.add(hold)
-                self.balance -= hold.cost
-                trade = {
-                    "name": order.symbol.name,
-                    "order": ORDERS.buy,
-                    "price": order.price,
-                    "amount": hold.amount,
-                    "balance": self.balance,
-                    "assets": self.get_assets,
-                    "profit": 0.0}
+                # add hold to order obj
+                order.hold = hold
+                # create trade
+                trade = Trade(ORDERS.buy)
+                trade.new(self, order)
                 print(trade)
-                self.trades.append(trade)
+                self.trades.add(trade)
                 return True
         return False
 
-    def profit_pct(self, symbol, price):
-        hold = self.holds.get(symbol)
-        return hold.amount * price - hold.cost
-
-    def get_amount(self, symbol, price):
-        sub_balance = self.balance * symbol.pct
-        return sub_balance // price
-
     @property
     def get_assets(self):
-        assets = 0
+        assets = self.balance
         for h in self.holds.HOLDS:
             assets += h.cost
-        return assets + self.balance
+        return assets
 
     @property
     def can_buy(self):
@@ -126,10 +206,6 @@ class Simulation:
         self.state = State(balance, strategy.fees())
         self.logger = pd.DataFrame({})
 
-    def log(self, op, price, amount):
-        print_arg = f"{op}, {op} at= {price} | currant balance= {self.state.balance} | amount= {amount}"
-        self.print_template(print_arg)
-
     def by_row(self):
         for _, row in self.strategy.df.iterrows():
             orders = self.strategy.decision(self.state, row)
@@ -141,6 +217,7 @@ class Simulation:
 
     def by_date(self):
         for date in self.strategy.dates:
+            print('-' * 10)
             orders = self.strategy.decision(self.state, date)
             for order in orders:
                 if order.op == ORDERS.sell:

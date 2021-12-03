@@ -8,7 +8,8 @@ ORDERS = {
 COLS = {
     "date": "date",
     "close": "close",
-    "high": "high"
+    "high": "high",
+    "score": "Score"
 }
 
 ORDERS = DefaultMunch.fromDict(ORDERS)

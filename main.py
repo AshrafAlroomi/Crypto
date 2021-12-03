@@ -1,19 +1,19 @@
 from stocklab.simulation import *
-from utlis import read_binance_data
+from data import read_binance_data
 from strategies.midday import MidDayMulti
 from stocklab.portfolio import Portfolio
 
-tiks = ["AAVE", "ONE"]
+coins = ["BAT", "ONE", "NEO", "TRX"]
 portfolio = Portfolio()
-for tik in tiks:
-    path = f"data/Binance_{tik}USDT_1h.csv"
-    df = read_binance_data(path)
+for coin in coins:
+    df = read_binance_data(coin)
     dates = df["date"].values
-    portfolio.add_symbol(tik, 0.5, df)
+    portfolio.add_symbol(coin, 1.0, df)
 
 strategy = MidDayMulti(portfolio=portfolio, dates=dates)
-sim = Simulation(100, strategy)
+sim = Simulation(1000, strategy)
 sim.by_date()
+strategy.score()
 """
 path = "data/Binance_ONEUSDT_1h.csv"
 df = read_binance_data(path)
