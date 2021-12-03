@@ -5,4 +5,11 @@ ORDERS = {
     "sell": "Sell",
     "hold": "hold"
 }
+COLS = {
+    "date": "date",
+    "close": "close",
+    "high": "high"
+}
+
 ORDERS = DefaultMunch.fromDict(ORDERS)
+COLS = DefaultMunch.fromDict(COLS)
