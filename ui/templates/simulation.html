@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block scripts %}
+    <script type="text/javascript" charset="utf-8">
+        const socket = io();
+        socket.emit("next")
+        socket.on('result', data => {
+            console.log(data);
+            socket.emit("next")
+        });
+        socket.on("report", data => {
+            console.log("report")
+            console.log(data)
+        })
+
+        const stop_trading = () => {
+            socket.emit("stop")
+
+        }
+        const resume_trading = () => {
+            socket.emit("resume")
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <button onclick="stop_trading()">Stop</button>
+    <button onclick="resume_trading()">resume</button>
+{% endblock %}

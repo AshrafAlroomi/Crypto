@@ -12,7 +12,7 @@ from stocklab.order import Order, Orders
 
 class MidDay(Strategy):
     """
-    This strategy for single tik by hour
+    This strategy for single coin by hour
     start at the beginning of day depends
     on the LinearRegression angle and value
     for number of hours .
@@ -86,7 +86,6 @@ class MidDayMulti(Strategy):
     def __init__(self, *args, **kwargs):
         self.price_index = COLS.high
         self.score_index = COLS.score
-        self.dates = kwargs["dates"]
         self.state = None
         if "portfolio" in kwargs:
             self.portfolio = kwargs["portfolio"]
@@ -138,8 +137,11 @@ class MidDayMulti(Strategy):
             return True
         return False
 
-    def fees(self) -> float:
-        return 1.0
+    def sell_fees(self, cash) -> float:
+        return cash
+
+    def buy_fees(self, cash) -> float:
+        return cash
 
     @staticmethod
     def linear_reg(x, y):

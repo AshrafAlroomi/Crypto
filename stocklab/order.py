@@ -9,7 +9,7 @@ class Order:
         self.price = price
         self.score = score
 
-    def get_amount(self, balance):
+    def get_quantity(self, balance):
         return (balance * self.symbol.pct) // self.price
 
 

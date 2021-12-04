@@ -17,10 +17,13 @@ class Strategy(ABC):
     def should_sell(self, *args, **kwargs) -> bool: pass
 
     @abstractmethod
-    def fees(self) -> float: pass
+    def sell_fees(self, cash) -> float: pass
+
+    @abstractmethod
+    def buy_fees(self, cash) -> float: pass
 
     def score(self):
-        score_df = pd.DataFrame(self.state.trades)
+        score_df = pd.DataFrame(self.state.trades.to_dict)
         if not score_df.empty:
             print("-" * 10)
             print("\n")
@@ -32,3 +35,4 @@ class Strategy(ABC):
             print(f"score : {len(wins) / len(sell)}")
             print("\n")
             print("-" * 10)
+        return {}

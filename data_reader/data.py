@@ -30,7 +30,7 @@ def download_data():
             try:
                 endpoint = get_link(coin=coin, time=t)
                 file_name = endpoint.split('/')[-1]
-                if file_name in os.listdir('./data'):
+                if file_name in os.listdir(''):
                     continue
                 response = requests.get(endpoint, verify=False)
                 with open('data/' + file_name, 'wb') as f:
@@ -80,7 +80,7 @@ def get_symbols():
     SC/USDT [Daily] [Hourly] [Minute]
     LRC/USDT [Daily] [Hourly] [Minute]"""
 
-    return [x.split('/')[0] for x in data_string.split('\n')]
+    return [x.split('/')[0].strip() for x in data_string.split('\n')]
 
 
 def read_binance_data(coin):
