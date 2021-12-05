@@ -1,3 +1,5 @@
+import time
+
 from flask import render_template, redirect, url_for, request
 from ui.app import socket_app, app
 from flask_socketio import emit
@@ -54,6 +56,7 @@ def start(balance, coins):
 @socket_app.on("next")
 def next_trade():
     assert isinstance(SIMULATION, Simulation)
+    time.sleep(1)
     if SIMULATION.execute and not STOP:
         emit("result", SIMULATION.get_json)
     else:

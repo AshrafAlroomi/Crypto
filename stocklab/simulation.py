@@ -70,8 +70,8 @@ class Holds:
 
 
 class Trade:
-    def __init__(self, trade_type=ORDERS.buy):
-        self.id = uuid.uuid1().hex[:6]
+    def __init__(self, index, trade_type=ORDERS.buy):
+        self.index = index
         self.order = None
         self.state = None
         self.profit = 0.0
@@ -147,23 +147,8 @@ class Trades:
     def screen(self):
         pass
 
-    def by_id(self, trade_id):
-        for trade in self.TRADES:
-            if trade.id == trade_id:
-                return trade
-        return False
-
-    def by_order(self, order):
-        for trade in self.TRADES:
-            if trade.order == order:
-                return trade
-        return False
-
-    def by_hold(self, hold):
-        for trade in self.TRADES:
-            if trade.hold == hold:
-                return trade
-        return False
+    def by_index(self, index):
+        return [trade.to_dict for trade in self.TRADES if trade.index == index]
 
     @property
     def to_dict(self):
@@ -181,18 +166,18 @@ class State:
         self.holds = Holds()
         self.trades = Trades()
 
-    def sell(self, order):
+    def sell(self, order, index):
         if self.can_sell:
             # del hold
             self.holds.drop(order.hold)
             # create trade
-            trade = Trade(ORDERS.sell)
+            trade = Trade(index, ORDERS.sell)
             trade.new(self, order)
             self.trades.add(trade)
             return True
         return False
 
-    def buy(self, order):
+    def buy(self, order, index):
         if self.can_buy:
             # get how many unit can buy
             quantity = order.get_quantity(self.balance)
@@ -203,7 +188,7 @@ class State:
                 # add hold to order obj
                 order.hold = hold
                 # create trade
-                trade = Trade(ORDERS.buy)
+                trade = Trade(index, ORDERS.buy)
                 trade.new(self, order)
                 self.trades.add(trade)
                 return True
@@ -234,18 +219,18 @@ class Simulation:
 
     @property
     def execute(self):
-        if not self.index.current:
+        self.index.next()
+        if self.index.current is None:
             return False
         orders = self.strategy.decision(self.state, self.index.current)
         for order in orders:
             if order.op == ORDERS.sell:
-                self.response = self.state.sell(order)
+                self.response = self.state.sell(order, self.index.current)
             elif order.op == ORDERS.buy:
-                self.response = self.state.buy(order)
+                self.response = self.state.buy(order, self.index.current)
             else:
                 self.response = False
-        # print(self.get_json)
-        self.index.next()
+
         return True
 
     @property
@@ -253,7 +238,7 @@ class Simulation:
         if self.response:
             return {
                 "date": str(self.index.current),
-                "trade": self.state.trades.TRADES[-1].to_dict,
+                "trades": self.state.trades.by_index(self.index.current),
                 "holds": self.state.holds.to_dict,
                 "balance": self.state.balance,
                 "assets": self.state.get_assets,

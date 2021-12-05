@@ -1,0 +1,26 @@
+.card{
+    width: 12rem;
+    padding: 1rem;
+    color: aliceblue;
+}
+
+.well {
+    background: none;
+    height: 320px;
+}
+
+.table-scroll tbody {
+    position: absolute;
+    overflow-y: scroll;
+    height: 500px;
+}
+
+.table-scroll tr {
+    width: 100%;
+    table-layout: fixed;
+    display: inline-table;
+}
+
+.table-scroll thead > tr > th {
+    border: none;
+}

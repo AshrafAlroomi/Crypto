@@ -1,11 +1,16 @@
 {% extends 'base.html' %}
 {% block scripts %}
+    <script src="{{ url_for('static', filename='js/elements.js') }}"></script>
     <script type="text/javascript" charset="utf-8">
         const socket = io();
         socket.emit("next")
         socket.on('result', data => {
             console.log(data);
             socket.emit("next")
+            update_trades(data.trades)
+            update_holds(data.holds)
+            update_cards(data)
+
         });
         socket.on("report", data => {
             console.log("report")
@@ -23,6 +28,91 @@
 {% endblock %}
 
 {% block content %}
-    <button onclick="stop_trading()">Stop</button>
-    <button onclick="resume_trading()">resume</button>
+    <div class="row">
+        <div class="col">
+            <div class="row">
+
+                <div class="col-3">
+                    <div class="card bg-danger">
+                        <h2 id="balance">0</h2>
+                        <p>Balance</p>
+                    </div>
+
+                </div>
+                <div class="col-3">
+                    <div class="card bg-primary">
+                        <h2 id="assets">0</h2>
+                        <p>Assets</p>
+                    </div>
+
+                </div>
+                <div class="col-3">
+                    <div class="card bg-success">
+                        <h2 id="profit">0</h2>
+                        <p>Profit</p>
+                    </div>
+
+                </div>
+
+                <div class="col-3">
+                    <button class="btn btn-danger" onclick="stop_trading()">Stop</button>
+                    <button class="btn btn-success" onclick="resume_trading()">resume</button>
+
+                </div>
+            </div>
+
+            <div class="row">
+
+                <div class="col-6">
+                    <h2>
+                        Trades
+                    </h2>
+                    <div class="well">
+                        <table id="trade_list" class="table table-scroll table-striped">
+                            <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>#</th>
+                                <th>Coin</th>
+                                <th>price</th>
+                                <th>profit</th>
+                            </tr>
+                            </thead>
+                            <tbody id="trade_list_body">
+
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                </div>
+                <div class="col-6">
+                    <h2>
+                        Holds
+                    </h2>
+                    <div class="well">
+                        <table id="hold_list" class="table table-scroll table-striped">
+                            <thead>
+                            <tr>
+                                <th>symbol</th>
+                                <th>#</th>
+                                <th>price</th>
+                                <th>cost</th>
+                            </tr>
+                            </thead>
+                            <tbody id="hold_list_body">
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+
+
 {% endblock %}
