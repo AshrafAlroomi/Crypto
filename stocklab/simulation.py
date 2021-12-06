@@ -214,7 +214,7 @@ class Simulation:
     def __init__(self, balance, strategy, indexes):
         self.strategy = strategy
         self.state = State(balance, strategy)
-        self.index = Index(indexes)
+        self.index = Index(indexes[0], indexes[1])
         self.response = False
 
     @property
@@ -222,12 +222,12 @@ class Simulation:
         self.index.next()
         if self.index.current is None:
             return False
-        orders = self.strategy.decision(self.state, self.index.current)
+        orders = self.strategy.decision(self.state, self.index)
         for order in orders:
             if order.op == ORDERS.sell:
-                self.response = self.state.sell(order, self.index.current)
+                self.response = self.state.sell(order, self.index)
             elif order.op == ORDERS.buy:
-                self.response = self.state.buy(order, self.index.current)
+                self.response = self.state.buy(order, self.index)
             else:
                 self.response = False
 
@@ -238,7 +238,7 @@ class Simulation:
         if self.response:
             return {
                 "date": str(self.index.current),
-                "trades": self.state.trades.by_index(self.index.current),
+                "trades": self.state.trades.by_index(self.index),
                 "holds": self.state.holds.to_dict,
                 "balance": self.state.balance,
                 "assets": self.state.get_assets,

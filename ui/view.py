@@ -57,7 +57,7 @@ def start(balance, coins, values):
         PORTFOLIO.add_symbol(coins[i], float(values[i]), df)
     dates = dates[:50]
     STRATEGY = MidDayMulti(portfolio=PORTFOLIO)
-    SIMULATION = Simulation(balance, STRATEGY, dates)
+    SIMULATION = Simulation(balance, STRATEGY, (dates, "date"))
 
     return render_template("simulation.html")
 

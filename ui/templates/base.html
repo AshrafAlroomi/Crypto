@@ -14,11 +14,11 @@
     <script src={{ url_for('static', filename='js/popper.min.js') }}></script>
     <script src={{ url_for('static', filename='js/bootstrap.min.js') }}></script>
 
-
-</head>
-<body>
 {% block scripts %}
 {% endblock scripts %}
+</head>
+<body>
+{% include "navbar.html" %}
 <section id="main_inner">
     <div class="container">
         <div class="row">

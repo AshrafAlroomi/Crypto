@@ -98,11 +98,11 @@ class MidDayMulti(Strategy):
             symbol.df["Buy"] = [random.randint(0, 1) for _ in range(len(symbol.df))]
             symbol.df["Score"] = [random.random() for _ in range(len(symbol.df))]
 
-    def decision(self, state, date):
+    def decision(self, state, index):
         orders = Orders()
         self.state = state
         for hold in state.holds.HOLDS:
-            price = hold.symbol.get_by_date(date, self.price_index)
+            price = hold.symbol.get_by_index(index, self.price_index)
             if price:
                 if self.should_sell(hold, price):
                     order = Order(op=ORDERS.sell, symbol=hold.symbol,
@@ -110,19 +110,19 @@ class MidDayMulti(Strategy):
                     orders.add_order(order)
 
         for symbol in self.portfolio.symbols - self.state.holds.symbols:
-            if self.should_buy(symbol, date):
-                price = symbol.get_by_date(date, self.price_index)
-                score = symbol.get_by_date(date, self.score_index)
+            if self.should_buy(symbol, index):
+                price = symbol.get_by_index(index, self.price_index)
+                score = symbol.get_by_index(index, self.score_index)
                 if price:
                     order = Order(op=ORDERS.buy, symbol=symbol,
                                   price=price, score=score)
                     orders.add_order(order)
         return orders
 
-    def should_buy(self, symbol, date) -> bool:
+    def should_buy(self, symbol, index) -> bool:
         if symbol in self.state.holds.symbols:
             return False
-        row = symbol.get_by_date(date, "Buy")
+        row = symbol.get_by_index(index, "Buy")
         if row == 1:
             return True
         return False

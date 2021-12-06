@@ -6,10 +6,12 @@ ORDERS = {
     "hold": "hold"
 }
 COLS = {
+    "index": "date",
     "date": "date",
     "close": "close",
     "high": "high",
-    "score": "Score"
+    "score": "Score",
+
 }
 
 ORDERS = DefaultMunch.fromDict(ORDERS)

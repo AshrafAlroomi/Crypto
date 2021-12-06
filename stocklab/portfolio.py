@@ -9,8 +9,8 @@ class Symbol(object):
         self.pct = pct
         self.df = df
 
-    def get_by_date(self, date, col):
-        row = self.df.loc[self.df[COLS.date] == date][col]
+    def get_by_index(self, index, col):
+        row = self.df.loc[self.df[index.col_name] == index.current][col]
         if not row.empty:
             return row.iloc[-1]
         return False
@@ -51,6 +51,5 @@ class Portfolio(object):
     def get_price(self, name, date, col=COLS.high):
         for symbol in self.symbols.SYMBOLS:
             if symbol.name == name:
-                return symbol.get_by_date(date, col)
+                return symbol.get_by_index(date, col)
         return False
-
