@@ -1,6 +1,3 @@
-from stocklab.config import *
-
-
 class Order:
     def __init__(self, op, symbol=None, hold=None, price=0, score=0):
         self.op = op

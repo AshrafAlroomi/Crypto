@@ -1,7 +1,7 @@
-from stocklab.simulation import *
+from stocklab.backtest.simulation import Simulation
 from data.binance import read_binance_data
-from strategies.midday import MidDayMulti
-from stocklab.portfolio import Portfolio
+from strategies.tests import RandomStrategy
+from stocklab.portfolio.portfolio import Portfolio
 
 coins = ["BAT", "ONE", "NEO", "TRX"]
 portfolio = Portfolio()
@@ -11,7 +11,7 @@ for coin in coins:
     dates = df["date"].values
     portfolio.add_symbol(coin, 1.0, df)
 
-strategy = MidDayMulti(portfolio=portfolio)
+strategy = RandomStrategy(portfolio=portfolio)
 sim = Simulation(1000, strategy, indexes=dates[:100])
 while True:
     if sim.execute:

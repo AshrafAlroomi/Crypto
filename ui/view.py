@@ -3,16 +3,18 @@ from flask import render_template, redirect, url_for, request
 from ui.app import socket_app, app
 from flask_socketio import emit
 from data.binance import read_binance_data, get_symbols
-from stocklab.portfolio import Portfolio
-from stocklab.simulation import Simulation
-from strategies.midday import MidDayMulti
+from stocklab.portfolio.portfolio import Portfolio
+from stocklab.backtest.simulation import Simulation
+from strategies.tests import RandomStrategy
 
 PORTFOLIO = Portfolio()
 SIMULATION = None
 STRATEGY = None
 STOP = False
+DELAY = 1.0
 
 
+# views
 @app.route('/', methods=["GET", "POST"])
 def index():
     if request.method == 'POST':
@@ -55,38 +57,47 @@ def start(balance, coins, values):
         if len(dates) < len(new_dates):
             dates = new_dates
         PORTFOLIO.add_symbol(coins[i], float(values[i]), df)
-    dates = dates[:50]
-    STRATEGY = MidDayMulti(portfolio=PORTFOLIO)
+    dates = dates
+    STRATEGY = RandomStrategy(portfolio=PORTFOLIO)
     SIMULATION = Simulation(balance, STRATEGY, (dates, "date"))
 
     return render_template("simulation.html")
 
 
-@socket_app.on("next")
-def next_trade():
-    assert isinstance(SIMULATION, Simulation)
-    time.sleep(1)
-    if SIMULATION.execute and not STOP:
-        emit("result", SIMULATION.get_json)
-    else:
-        emit("report", STRATEGY.score())
-
-
-@socket_app.on("stop")
-def stop_trading():
+# rest api
+@app.route("/stop", methods=['GET'])
+def stop():
     print("stop")
     global STOP
     STOP = True
+    return {}
 
 
-@socket_app.on("resume")
-def resume_trading():
+@app.route("/resume", methods=['GET'])
+def resume():
     print("resume")
     global STOP
     STOP = False
-    next_trade()
+    return {}
 
 
-@socket_app.on("test")
-def test():
-    print("socket api is working")
+@app.route("/delay/<t>")
+def delay(t):
+    new_delay = float(t)
+    if new_delay >= 0.0:
+        global DELAY
+        DELAY = new_delay
+    return {}
+
+
+# socket api
+@socket_app.on("next")
+def next_trade():
+    assert isinstance(SIMULATION, Simulation)
+    time.sleep(DELAY)
+    if SIMULATION.execute and not STOP:
+        emit("result", SIMULATION.get_json)
+    else:
+        # emit("report", STRATEGY.score())
+        pass
+
