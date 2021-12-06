@@ -16,30 +16,45 @@ STOP = False
 @app.route('/', methods=["GET", "POST"])
 def index():
     if request.method == 'POST':
-        coins = request.coins.data
-        balance = request.balance.data
-        return redirect(url_for("start", coins=coins, balance=balance))
+        balance = 0
+        coins = []
+        values = []
+        for k, v in request.form.to_dict().items():
+            if k == "balance":
+                balance = v
+            elif len(k.split("_")) > 1:
+                coin = k.split("_")[0]
+                value = float(v)
+                if 0.0 < value <= 1.0:
+                    coins.append(coin)
+                    values.append(str(value))
+            else:
+                pass
+        if coins and balance and values:
+            return redirect(url_for("start", coins=",".join(coins), values=",".join(values), balance=balance))
+
     symbols = get_symbols()
     return render_template("home.html", symbols=symbols)
 
 
-@app.route("/start/<balance>/<coins>")
-def start(balance, coins):
+@app.route("/start/<balance>/<coins>/<values>")
+def start(balance, coins, values):
     global SIMULATION
     global STRATEGY
-    if coins and balance:
+    if coins and balance and values:
         coins = coins.split(",")
+        values = values.split(",")
         balance = int(balance)
     else:
         raise ValueError
 
     dates = []
-    for coin in coins:
-        df = read_binance_data(coin)
+    for i in range(len(coins)):
+        df = read_binance_data(coins[i])
         new_dates = df["date"].values
         if len(dates) < len(new_dates):
             dates = new_dates
-        PORTFOLIO.add_symbol(coin, 0.25, df)
+        PORTFOLIO.add_symbol(coins[i], float(values[i]), df)
     dates = dates[:50]
     STRATEGY = MidDayMulti(portfolio=PORTFOLIO)
     SIMULATION = Simulation(balance, STRATEGY, dates)

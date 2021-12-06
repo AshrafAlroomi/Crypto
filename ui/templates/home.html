@@ -1,28 +1,50 @@
 {% extends 'base.html' %}
 {% block scripts %}
     <script>
-        $(document).ready(function () {
-
-            $(".symbol").click(function (e) {
-                //e.preventDefault();
-                const name = $(this).attr('name');
-                $(this).attr("disabled", true);
-                $("#symbol_menu").append("" +
-                    "<label for='username'>Coin pct:</label>" +
-                    "<input name='name' type='number' step='0.1' class='input_symbol'><br>")
+        const del_symbol = (id) => {
+            const div_id = "div_" + id
+            document.getElementById(div_id).remove()
+            document.getElementById(id).disabled = false
 
 
-            });
+        }
 
-        });
+        const add_symbol = (id) => {
+            document.getElementById(id).disabled = true
+
+            const menu = document.getElementById("symbol_menu")
+            var div = document.createElement('div');
+            div.id = "div_" + id
+            var input = document.createElement('input');
+            input.name = id + "_value"
+            input.type = "number"
+            input.step = "0.01"
+            var p = document.createElement('p');
+            p.innerText = id
+            var button = document.createElement('button');
+            button.type  = "button"
+            button.innerText = "delete"
+            button.className ="btn btn-sm btn-danger"
+            button.onclick = function (){
+                del_symbol(id)
+            }
+            div.append(p)
+            div.append(input)
+            div.append(button)
+            menu.append(div)
+
+        }
+
     </script>
 {% endblock scripts %}
 {% block content %}
     {% for symbol in symbols %}
-        <button class="btn btn-primary symbol" id="{{ symbol }}" name="{{ symbol }}">{{ symbol }}</button>
+        <button class="btn btn-primary symbol" id="{{ symbol }}"
+                name="{{ symbol }}" onclick="add_symbol('{{ symbol }}')">{{ symbol }}</button>
     {% endfor %}
 
     <form id="coins_form" method="post" action="/">
+        <input type="number" name="balance">
         <input class="btn btn-success" type="submit" value="Start">
         <div id="symbol_menu" class="">
 
