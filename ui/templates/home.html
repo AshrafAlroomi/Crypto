@@ -1,12 +1,31 @@
 {% extends 'base.html' %}
+{% block scripts %}
+    <script>
+        $(document).ready(function () {
+
+            $(".symbol").click(function (e) {
+                //e.preventDefault();
+                const name = $(this).attr('name');
+                $(this).attr("disabled", true);
+                $("#symbol_menu").append("" +
+                    "<label for='username'>Coin pct:</label>" +
+                    "<input name='name' type='number' step='0.1' class='input_symbol'><br>")
+
+
+            });
+
+        });
+    </script>
+{% endblock scripts %}
 {% block content %}
-    <form method="post" action="/">
-        {% for field in form %}
-            <tr>
-                <th>{{ field.label }}</th>
-                <td>{{ field }}</td>
-            </tr>
-        {% endfor %}
-        <input type="submit" value="Submit">
+    {% for symbol in symbols %}
+        <button class="btn btn-primary symbol" id="{{ symbol }}" name="{{ symbol }}">{{ symbol }}</button>
+    {% endfor %}
+
+    <form id="coins_form" method="post" action="/">
+        <input class="btn btn-success" type="submit" value="Start">
+        <div id="symbol_menu" class="">
+
+        </div>
     </form>
 {% endblock %}

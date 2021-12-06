@@ -1,5 +1,5 @@
 from stocklab.simulation import *
-from data_reader.data import read_binance_data
+from data.binance import read_binance_data
 from strategies.midday import MidDayMulti
 from stocklab.portfolio import Portfolio
 

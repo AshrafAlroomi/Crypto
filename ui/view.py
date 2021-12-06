@@ -1,13 +1,11 @@
 import time
-
 from flask import render_template, redirect, url_for, request
 from ui.app import socket_app, app
 from flask_socketio import emit
-from data_reader.data import read_binance_data
+from data.binance import read_binance_data, get_symbols
 from stocklab.portfolio import Portfolio
 from stocklab.simulation import Simulation
 from strategies.midday import MidDayMulti
-from ui.forms import StartForm
 
 PORTFOLIO = Portfolio()
 SIMULATION = None
@@ -17,16 +15,12 @@ STOP = False
 
 @app.route('/', methods=["GET", "POST"])
 def index():
-    form = StartForm()
     if request.method == 'POST':
-        form = StartForm(request.form)
-        if form.validate():
-            coins = form.coins.data
-            balance = form.balance.data
-            if coins and balance:
-                coins = ",".join(coins)
-                return redirect(url_for("start", coins=coins, balance=balance))
-    return render_template("home.html", form=form)
+        coins = request.coins.data
+        balance = request.balance.data
+        return redirect(url_for("start", coins=coins, balance=balance))
+    symbols = get_symbols()
+    return render_template("home.html", symbols=symbols)
 
 
 @app.route("/start/<balance>/<coins>")

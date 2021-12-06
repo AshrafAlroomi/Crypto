@@ -1,5 +1,3 @@
-import requests
-import os
 import datetime
 import pandas as pd
 
@@ -11,32 +9,10 @@ def get_coin_path(coin, usd='USDT', time='1h'):
         time = 'minute'
     else:
         time = '1h'
-    return f"data/Binance_{coin}{usd}_{time}.csv"
+    return f"data/dfs/Binance_{coin}{usd}_{time}.csv"
 
 
-def download_data():
-    # ref : https://www.cryptodatadownload.com/data/binance/
-    def get_link(coin, usd='USDT', time='1h'):
-        if time == 'Daily':
-            time = 'd'
-        elif time == 'Minute':
-            time = 'minute'
-        else:
-            time = '1h'
-        return f"https://www.cryptodatadownload.com/cdd/Binance_{coin + usd}_{time}.csv"
 
-    for coin in get_symbols():
-        for t in ['Daily', 'Hourly']:
-            try:
-                endpoint = get_link(coin=coin, time=t)
-                file_name = endpoint.split('/')[-1]
-                if file_name in os.listdir(''):
-                    continue
-                response = requests.get(endpoint, verify=False)
-                with open('data/' + file_name, 'wb') as f:
-                    f.write(response.content)
-            except Exception as e:
-                print(e)
 
 
 def get_symbols():
