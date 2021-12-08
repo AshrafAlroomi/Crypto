@@ -10,6 +10,8 @@ COLS = {
     "date": "date",
     "close": "close",
     "high": "high",
+    "low": "low",
+    "open": "open",
     "score": "Score",
 
 }

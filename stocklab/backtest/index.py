@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 
 
@@ -16,3 +18,4 @@ class Index(object):
             self.current = None
         finally:
             return self.current
+

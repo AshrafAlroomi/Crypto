@@ -8,7 +8,7 @@ class Strategy(ABC):
     def setup_data(self) -> pd.DataFrame: pass
 
     @abstractmethod
-    def decision(self, *args, **kwargs) -> tuple: pass
+    def decision(self, *args, **kwargs): pass
 
     @abstractmethod
     def should_buy(self, *args, **kwargs) -> bool: pass
@@ -22,17 +22,5 @@ class Strategy(ABC):
     @abstractmethod
     def buy_fees(self, cash) -> float: pass
 
-    def score(self):
-        score_df = pd.DataFrame(self.state.trades.to_dict)
-        if not score_df.empty:
-            print("-" * 10)
-            print("\n")
-            sell = score_df[score_df.order == "Sell"]
-            wins = sell[sell.profit > 0.0]
-            symbol = score_df.groupby(["name"]).count()
-            print(symbol.head())
-            print(f"#trades : {len(score_df)}")
-            print(f"score : {len(wins) / len(sell)}")
-            print("\n")
-            print("-" * 10)
-        return {}
+    @abstractmethod
+    def score(self): pass

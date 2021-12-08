@@ -1,5 +1,6 @@
 import time
 from flask import render_template, redirect, url_for, request
+from strategies.patterns import PatternStrategy, PatternStrategyByhour
 from ui.app import socket_app, app
 from flask_socketio import emit
 from data.binance import read_binance_data, get_symbols
@@ -58,7 +59,7 @@ def start(balance, coins, values):
             dates = new_dates
         PORTFOLIO.add_symbol(coins[i], float(values[i]), df)
     dates = dates
-    STRATEGY = RandomStrategy(portfolio=PORTFOLIO)
+    STRATEGY = PatternStrategyByhour(portfolio=PORTFOLIO)
     SIMULATION = Simulation(balance, STRATEGY, (dates, "date"))
 
     return render_template("simulation.html")
@@ -70,6 +71,7 @@ def stop():
     print("stop")
     global STOP
     STOP = True
+    SIMULATION.strategy.score()
     return {}
 
 
@@ -98,6 +100,5 @@ def next_trade():
     if SIMULATION.execute and not STOP:
         emit("result", SIMULATION.get_json)
     else:
-        # emit("report", STRATEGY.score())
+        SIMULATION.strategy.score()
         pass
-

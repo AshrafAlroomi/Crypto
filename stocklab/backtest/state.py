@@ -27,7 +27,7 @@ class State:
             quantity = order.get_quantity(self.balance)
             if quantity > 0:
                 # create hold
-                hold = Hold(order.symbol, quantity, order.price)
+                hold = Hold(order.symbol, quantity, order.price, index)
                 self.holds.add(hold)
                 # add hold to order obj
                 order.hold = hold

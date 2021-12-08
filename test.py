@@ -1,5 +1,6 @@
 from stocklab.backtest.simulation import Simulation
 from data.binance import read_binance_data
+from strategies.patterns import PatternStrategy, PatternStrategyByhour
 from strategies.tests import RandomStrategy
 from stocklab.portfolio.portfolio import Portfolio
 
@@ -11,12 +12,15 @@ for coin in coins:
     dates = df["date"].values
     portfolio.add_symbol(coin, 1.0, df)
 
-strategy = RandomStrategy(portfolio=portfolio)
-sim = Simulation(1000, strategy, indexes=dates[:100])
+strategy = PatternStrategyByhour(portfolio=portfolio)
+sim = Simulation(1000, strategy, (dates, "date"))
+
 while True:
     if sim.execute:
-        pass
+        # print(sim.get_json.get("trades"))
+        if sim.get_json.get("profit"):
+            print(sim.get_json.get("profit"))
+            print(sim.get_json.get("period"))
     else:
         break
 strategy.score()
-

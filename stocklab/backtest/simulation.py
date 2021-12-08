@@ -9,13 +9,16 @@ class Simulation:
         self.state = State(balance, strategy)
         self.index = Index(indexes[0], indexes[1])
         self.response = False
+        self.first_index = None
 
     @property
     def execute(self):
         self.index.next()
         if self.index.current is None:
             return False
-        orders = self.strategy.decision(self.state, self.index)
+        if self.first_index is None:
+            self.first_index = self.index.current
+        orders = self.strategy.decision(state=self.state, index=self.index)
         for order in orders:
             if order.op == ORDERS.sell:
                 self.response = self.state.sell(order, self.index)
@@ -29,7 +32,9 @@ class Simulation:
     @property
     def get_json(self):
         if self.response:
+            period = self.index.current - self.first_index
             return {
+                "period": str(period.astype('timedelta64[D]')),
                 "date": str(self.index.current),
                 "trades": self.state.trades.by_index(self.index),
                 "holds": self.state.holds.to_dict,

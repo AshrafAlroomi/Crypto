@@ -5,11 +5,10 @@
         const socket = io();
         socket.emit("next")
         socket.on('result', data => {
-            socket.emit("next");
-            update_trades(data.trades);
+            //update_trades(data.trades);
             update_holds(data.holds);
             update_cards(data);
-
+            socket.emit("next");
         });
         socket.on("report", data => {
             console.log("report")
@@ -35,21 +34,21 @@
         <div class="col">
             <div class="row">
 
-                <div class="col-3">
+                <div class="col-2">
                     <div class="card bg-danger">
                         <h2 id="balance">0</h2>
                         <p>Balance</p>
                     </div>
 
                 </div>
-                <div class="col-3">
+                <div class="col-2">
                     <div class="card bg-primary">
                         <h2 id="assets">0</h2>
                         <p>Assets</p>
                     </div>
 
                 </div>
-                <div class="col-3">
+                <div class="col-2">
                     <div class="card bg-success">
                         <h2 id="profit">0</h2>
                         <p>Profit</p>
@@ -57,7 +56,15 @@
 
                 </div>
 
-                <div class="col-3">
+                <div class="col-2">
+                    <div class="card bg-secondary">
+                        <h2 id="period">0</h2>
+                        <p>Period</p>
+                    </div>
+
+                </div>
+
+                <div class="col-4">
                     <button class="btn btn-danger" onclick="stop_trading()">Stop</button>
                     <button class="btn btn-success" onclick="resume_trading()">resume</button>
                     <input type="number" step="0.1" value="1.0" id="time_delay">

@@ -2,11 +2,12 @@ from stocklab.portfolio.symbols import Symbols
 
 
 class Hold:
-    def __init__(self, symbol=None, quantity=0, price=0.0):
+    def __init__(self, symbol=None, quantity=0, price=0.0, index=None):
         self.symbol = symbol
         self.quantity = quantity
         self.unit_price = price
         self.cost = price * quantity
+        self.index = index
 
     def profit_pct(self, price):
         return self.quantity * price - self.cost
