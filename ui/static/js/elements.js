@@ -12,6 +12,7 @@ const update_trades = (data) => {
      <th>price</th>
      <th>profit</th>
      */
+
     if (!data) {
         return 0;
     }
@@ -54,9 +55,11 @@ const update_holds = (data) => {
     <th>price</th>
     <th>cost</th>
      */
+
     if (!data) {
         return 0;
     }
+    console.log(data);
     var table = document.getElementById(HOLD_LIST);
     table.innerHTML = "";
 

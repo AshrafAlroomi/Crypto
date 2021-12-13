@@ -11,9 +11,10 @@ from stocklab.strategy.order import Order, Orders
 class BasicStrategy(Strategy):
     STOP_LOSS = -0.01
     TAKE_PROFIT = 0.01
+    PRICE_BUY_INDEX = COLS.close
+    PRICE_SELL_INDEX = COLS.high
 
     def __init__(self, *args, **kwargs):
-        self.price_index = COLS.high
         self.score_index = COLS.score
         self.state = None
         if "portfolio" in kwargs:
@@ -34,7 +35,7 @@ class BasicStrategy(Strategy):
         orders = Orders()
         self.state = state
         for hold in state.holds.HOLDS:
-            price = hold.symbol.get_by_index(index, self.price_index)
+            price = hold.symbol.get_by_index(index, self.PRICE_SELL_INDEX)
             if price:
                 if self.should_sell(hold, price):
                     order = Order(op=ORDERS.sell, symbol=hold.symbol,
@@ -43,7 +44,7 @@ class BasicStrategy(Strategy):
 
         for symbol in self.portfolio.symbols - self.state.holds.symbols:
             if self.should_buy(symbol, index):
-                price = symbol.get_by_index(index, self.price_index)
+                price = symbol.get_by_index(index, self.PRICE_BUY_INDEX)
                 score = symbol.get_by_index(index, self.score_index)
                 if price:
                     order = Order(op=ORDERS.buy, symbol=symbol,

@@ -27,8 +27,9 @@ class Trade:
             # calculate the profit after sell
             # with fees
             order_cost = self.order.hold.quantity * self.order.price
-            self.profit = self.state.strategy.sell_fees(order_cost - self.order.hold.cost)
-            self.state.balance += self.state.strategy.sell_fees(order_cost)
+            released = self.state.strategy.sell_fees(order_cost)
+            self.profit = released - self.order.hold.cost
+            self.state.balance += released
 
         else:
             raise ValueError
