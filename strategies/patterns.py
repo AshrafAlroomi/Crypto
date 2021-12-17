@@ -49,21 +49,11 @@ class PatternStrategy(BasicStrategy):
         return 0
 
 
-"""
-TOP_10 = ['CDL3INSIDE', 'CDLSPINNINGTOP', 'CDLSEPARATINGLINES',
-          'CDLRICKSHAWMAN', 'CDLMORNINGSTAR', 'CDLMATCHINGLOW',
-          'CDLINVERTEDHAMMER', 'CDLHIKKAKEMOD', 'CDLHIKKAKE',
-          'CDLHARAMICROSS']
-"""
-
-TOP_10 = ['CDL3LINESTRIKE',
-          'CDLINVERTEDHAMMER',
-          'CDLXSIDEGAP3METHODS',
-          'CDLGAPSIDESIDEWHITE']
-
-
 class PatternStrategyByhour(BasicStrategy):
-    PATTERN_LIST = ["CDL3WHITESOLDIERS"]
+    PATTERN_LIST = ['CDL3LINESTRIKE',
+                    'CDLINVERTEDHAMMER',
+                    'CDLXSIDEGAP3METHODS',
+                    'CDLGAPSIDESIDEWHITE']
     STOP_LOSS = -0.03
     TAKE_PROFIT = 0.012
     TIME_LIMIT = 60 * 8  # 3 hours
@@ -79,13 +69,6 @@ class PatternStrategyByhour(BasicStrategy):
                 func = eval(f"talib.{f}")
                 vals = func(symbol.df[COLS.open], symbol.df[COLS.high], symbol.df[COLS.low], symbol.df[COLS.high])
                 symbol.df["Signal"] += vals
-            symbol.df["ma_3"] = talib.KAMA(symbol.df["close"], timeperiod=3)
-            symbol.df["ma_15"] = talib.KAMA(symbol.df["close"], timeperiod=15)
-            symbol.df["upperband"], _, symbol.df["lowerband"] = talib.BBANDS(symbol.df["close"],
-                                                                             timeperiod=10,
-                                                                             nbdevup=2,
-                                                                             nbdevdn=2, matype=0)
-
             symbol.df["Score"] = symbol.df["Signal"]
             symbol.df["Buy"] = symbol.df["Signal"].apply(lambda x: self.buy_signal(x))
 
@@ -96,7 +79,6 @@ class PatternStrategyByhour(BasicStrategy):
             price = hold.symbol.get_by_index(index, self.PRICE_SELL_INDEX)
             if price:
                 should_sell, reason = self.should_sell(hold, price, index)
-                print(reason)
                 if should_sell:
                     if reason == self.REASON_TAKE_PROFIT:
                         price = hold.symbol.get_by_index(index, COLS.high)
@@ -130,10 +112,7 @@ class PatternStrategyByhour(BasicStrategy):
             return False
         buy_signal = symbol.get_by_index(index, "Buy")
         if buy_signal == 1:
-            ma_3 = symbol.get_by_index(index, "ma_3")
-            ma_15 = symbol.get_by_index(index, "ma_15")
-            if ma_3 > ma_15:
-                return True
+            return True
         return False
 
     def should_sell(self, hold, price, index):
@@ -159,17 +138,3 @@ class PatternStrategyByhour(BasicStrategy):
         if x > 0:
             return 1
         return 0
-
-
-class P(BasicStrategy):
-
-    def setup_data(self):
-        for symbol in self.portfolio.symbols:
-            symbol.df["Buy"] = 0
-            symbol.df["Signal"] = 0
-            for f in BASIC_LIST:
-                func = eval(f"talib.{f}")
-                vals = func(symbol.df[COLS.open], symbol.df[COLS.high], symbol.df[COLS.low], symbol.df[COLS.high])
-                symbol.df["Signal"] += [1 for val in vals if val == 200]
-            symbol.df["Score"] = symbol.df["Signal"]
-            symbol.df["Buy"] = symbol.df["Signal"].apply(lambda x: self.buy_signal(x))

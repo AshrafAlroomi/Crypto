@@ -1,12 +1,17 @@
 import time
 from flask import render_template, redirect, url_for, request
-from strategies.patterns import PatternStrategy, PatternStrategyByhour
+#from strategies.patterns import PatternStrategy, PatternStrategyByhour
+from strategies.period import PatternWithIndicators
 from ui.app import socket_app, app
 from flask_socketio import emit
 from data.binance import read_binance_data, get_symbols
 from stocklab.portfolio.portfolio import Portfolio
 from stocklab.backtest.simulation import Simulation
-from strategies.tests import RandomStrategy
+from threading import Lock
+
+thread = None
+thread_lock = Lock()
+
 
 PORTFOLIO = Portfolio()
 SIMULATION = None
@@ -59,7 +64,7 @@ def start(balance, coins, values):
             dates = new_dates
         PORTFOLIO.add_symbol(coins[i], float(values[i]), df)
     dates = dates
-    STRATEGY = PatternStrategyByhour(portfolio=PORTFOLIO)
+    STRATEGY = PatternWithIndicators(portfolio=PORTFOLIO)
     SIMULATION = Simulation(balance, STRATEGY, (dates, "date"))
 
     return render_template("simulation.html")
