@@ -1,4 +1,4 @@
-from tester.setup import *
+from logger.setup import *
 
 
 def run():

@@ -1,4 +1,4 @@
-from tester import console
+from logger import console
 from curses import wrapper
 
 if __name__ == '__main__':
