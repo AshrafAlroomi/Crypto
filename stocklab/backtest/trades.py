@@ -83,7 +83,9 @@ class Trades:
         pass
 
     def by_index(self, index):
-        return [trade.to_dict for trade in self.TRADES if trade.index == index]
+        if self.TRADES:
+            return [trade.to_dict for trade in self.TRADES if trade.index == index]
+        return []
 
     @property
     def to_dict(self):

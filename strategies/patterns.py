@@ -4,13 +4,6 @@ from strategies.tests import BasicStrategy
 import pandas as pd
 import talib
 
-BASIC = """CDL3LINESTRIKE
-CDL3BLACKCROWS
-CDL3INSIDE
-CDL3WHITESOLDIERS
-CDL3STARSINSOUTH"""
-BASIC_LIST = [x.split(' ')[0] for x in BASIC.split('\n')]
-
 """
 
 ## func(open, high, low, close)
@@ -29,18 +22,21 @@ BASIC_LIST = [x.split(' ')[0] for x in BASIC.split('\n')]
 class PatternStrategy(BasicStrategy):
     STOP_LOSS = -0.03
     TAKE_PROFIT = 0.02
+    PATTERN_LIST = ['CDL3LINESTRIKE',
+                    'CDLINVERTEDHAMMER',
+                    'CDLXSIDEGAP3METHODS',
+                    'CDLGAPSIDESIDEWHITE']
 
-    def setup_data(self):
-
-        for symbol in self.portfolio.symbols:
-            symbol.df["Buy"] = 0
-            symbol.df["Signal"] = 0
-            for f in BASIC_LIST:
-                func = eval(f"talib.{f}")
-                vals = func(symbol.df[COLS.open], symbol.df[COLS.high], symbol.df[COLS.low], symbol.df[COLS.high])
-                symbol.df["Signal"] += vals
-            symbol.df["Score"] = symbol.df["Signal"]
-            symbol.df["Buy"] = symbol.df["Signal"].apply(lambda x: self.buy_signal(x))
+    def create_data(self, df):
+        df["Buy"] = 0
+        df["Signal"] = 0
+        for f in self.PATTERN_LIST:
+            func = eval(f"talib.{f}")
+            vals = func(df[COLS.open], df[COLS.high], df[COLS.low], df[COLS.high])
+            df["Signal"] += vals
+        df["Score"] = df["Signal"]
+        df["Buy"] = df["Signal"].apply(lambda x: self.buy_signal(x))
+        return df
 
     @staticmethod
     def buy_signal(x):
@@ -61,16 +57,16 @@ class PatternStrategyByhour(BasicStrategy):
     REASON_STOP_PROFIT = "STOP_LOSS"
     REASON_TIME_LIMIT = "TIME_LIMIT"
 
-    def setup_data(self):
-        for symbol in self.portfolio.symbols:
-            symbol.df["Buy"] = 0
-            symbol.df["Signal"] = 0
-            for f in self.PATTERN_LIST:
-                func = eval(f"talib.{f}")
-                vals = func(symbol.df[COLS.open], symbol.df[COLS.high], symbol.df[COLS.low], symbol.df[COLS.high])
-                symbol.df["Signal"] += vals
-            symbol.df["Score"] = symbol.df["Signal"]
-            symbol.df["Buy"] = symbol.df["Signal"].apply(lambda x: self.buy_signal(x))
+    def create_data(self, df):
+        df["Buy"] = 0
+        df["Signal"] = 0
+        for f in self.PATTERN_LIST:
+            func = eval(f"talib.{f}")
+            vals = func(df[COLS.open], df[COLS.high], df[COLS.low], df[COLS.high])
+            df["Signal"] += vals
+        df["Score"] = df["Signal"]
+        df["Buy"] = df["Signal"].apply(lambda x: self.buy_signal(x))
+        return df
 
     def decision(self, state, index):
         orders = Orders()

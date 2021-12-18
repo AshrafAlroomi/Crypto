@@ -1,6 +1,7 @@
 import random
 
 import numpy as np
+import pandas as pd
 from sklearn.linear_model import LinearRegression
 from stocklab.portfolio.portfolio import Portfolio
 from stocklab.strategy.abs import Strategy
@@ -19,15 +20,19 @@ class BasicStrategy(Strategy):
         self.state = None
         if "portfolio" in kwargs:
             self.portfolio = kwargs["portfolio"]
-            self.setup_data()
+            self.data()
             assert isinstance(self.portfolio, Portfolio)
         else:
             raise "portfolio is a must"
 
-    def setup_data(self):
+    def data(self):
         for symbol in self.portfolio.symbols:
-            symbol.df["Buy"] = [random.randint(0, 1) for _ in range(len(symbol.df))]
-            symbol.df["Score"] = [random.random() for _ in range(len(symbol.df))]
+            symbol.df = self.create_data(symbol.df)
+
+    def create_data(self, df) -> pd.DataFrame:
+        df["Buy"] = [random.randint(0, 1) for _ in range(len(df))]
+        df["Score"] = [random.random() for _ in range(len(df))]
+        return df
 
     def decision(self, *args, **kwargs):
         state = kwargs["state"]
@@ -83,9 +88,15 @@ class BasicStrategy(Strategy):
         df = self.state.trades.to_df
         if not df.empty:
             trade_count = len(df[df["order"] == ORDERS.buy])
-            win_count = len(df[df["profit"] > 0.0])
-            loss_count = len(df[df["profit"] < 0.0])
+            wins = df[df["profit"] > 0.0]["profit"].values
+            losses = df[df["profit"] < 0.0]["profit"].values
+            win_count = len(wins)
+            loss_count = len(losses)
+            win_avg = np.mean(wins)
+            loss_avg = np.mean(losses)
+            profit_avg = np.mean(df["profit"].values)
+            score = win_count / (loss_count + win_count)
 
-            print(f"#trades {trade_count}")
-            print(f"socre {win_count / (loss_count + win_count)}")
-
+            return {"trades": trade_count, "score": round(score, 2), "avg": round(profit_avg, 2),
+                    "wins": win_count, "losses": loss_count, "win_avg": round(win_avg, 3),
+                    "loss_avg": round(loss_avg, 3)}

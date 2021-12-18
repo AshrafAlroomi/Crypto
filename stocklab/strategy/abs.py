@@ -5,7 +5,10 @@ import pandas as pd
 class Strategy(ABC):
 
     @abstractmethod
-    def setup_data(self) -> pd.DataFrame: pass
+    def data(self): pass
+
+    @abstractmethod
+    def create_data(self, df) -> pd.DataFrame: pass
 
     @abstractmethod
     def decision(self, *args, **kwargs): pass
