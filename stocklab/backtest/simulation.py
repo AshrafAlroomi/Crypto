@@ -31,15 +31,14 @@ class Simulation:
 
     @property
     def get_json(self):
-        if self.response:
-            period = self.index.current - self.first_index
-            return {
-                "period": str(period.astype('timedelta64[D]')),
-                "date": str(self.index.current),
-                "trades": self.state.trades.by_index(self.index),
-                "holds": self.state.holds.to_dict,
-                "balance": self.state.balance,
-                "assets": self.state.get_assets,
-                "profit": self.state.trades.all_profit,
-            }
-        return {}
+        period = self.index.current - self.first_index
+        return {
+            "period": str(period.astype('timedelta64[D]')),
+            "date": str(self.index.current),
+            "trades": self.state.trades.by_index(self.index),
+            "holds": self.state.holds.to_dict,
+            "balance": self.state.balance,
+            "assets": self.state.get_assets,
+            "profit": self.state.trades.all_profit,
+        }
+
