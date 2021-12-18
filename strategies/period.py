@@ -1,7 +1,6 @@
 from stocklab.strategy.order import Orders, Order
 from stocklab.vars import *
 from strategies.patterns import PatternStrategyByhour
-from strategies.tests import BasicStrategy
 import pandas as pd
 from talib import EMA
 import talib
