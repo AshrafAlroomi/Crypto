@@ -1,20 +1,19 @@
-from munch import DefaultMunch
+from pydantic.dataclasses import dataclass
 
-ORDERS = {
-    "buy": "Buy",
-    "sell": "Sell",
-    "hold": "hold"
-}
-COLS = {
-    "index": "date",
-    "date": "date",
-    "close": "close",
-    "high": "high",
-    "low": "low",
-    "open": "open",
-    "score": "Score",
 
-}
+@dataclass
+class ORDERS:
+    buy = "Buy"
+    sell = "Sell"
+    hold = "Hold"
 
-ORDERS = DefaultMunch.fromDict(ORDERS)
-COLS = DefaultMunch.fromDict(COLS)
+
+@dataclass
+class COLS:
+    index = "date"
+    date = "date"
+    close = "close"
+    high = "high"
+    low = "low"
+    open = "open"
+    score = "Score"

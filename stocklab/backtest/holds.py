@@ -1,23 +1,27 @@
-from stocklab.portfolio.symbols import Symbols
+from stocklab.portfolio.symbols import Symbols, Symbol
+from stocklab.backtest.index import Index
+from pydantic.dataclasses import dataclass
+from typing import List
 
 
+@dataclass
 class Hold:
-    def __init__(self, symbol=None, quantity=0, price=0.0, index_current=None):
-        self.symbol = symbol
-        self.quantity = quantity
-        self.unit_price = price
-        self.cost = price * quantity
-        self.index_current = index_current
+    symbol: Symbol
+    quantity: int
+    unit_price: float
+    index_current: Index
+
+    @property
+    def cost(self):
+        return self.unit_price * self.quantity
 
     def profit_pct(self, price):
-        return (self.quantity * price - self.cost)/self.cost
+        return (self.quantity * price - self.cost) / self.cost
 
 
+@dataclass
 class Holds:
-    def __init__(self, holds=None):
-        if holds is None:
-            holds = []
-        self.HOLDS = holds
+    HOLDS: List[Hold]
 
     def add(self, hold):
         self.HOLDS.append(hold)
@@ -57,10 +61,7 @@ class Holds:
     def to_dict(self):
         hold_list = []
         for hold in self.HOLDS:
-            hold_dict = {}
-            hold_dict["symbol"] = hold.symbol.name
-            hold_dict["cost"] = hold.cost
-            hold_dict["quantity"] = hold.quantity
-            hold_dict["price"] = hold.unit_price
+            hold_dict = {"symbol": hold.symbol.name, "cost": hold.cost, "quantity": hold.quantity,
+                         "price": hold.unit_price}
             hold_list.append(hold_dict)
         return hold_list

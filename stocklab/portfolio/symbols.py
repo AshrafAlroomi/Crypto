@@ -1,26 +1,29 @@
-class Symbol(object):
-    def __init__(self, name, pct, df):
-        self.name = name
-        self.pct = pct
-        self.df = df
+import pandas as pd
+from typing import List
+from pydantic.dataclasses import dataclass
 
-    def get_by_index(self, index, col):
+
+@dataclass
+class Symbol(object):
+    name: str
+    pct: float
+    df: pd.DataFrame
+
+    def get_by_index(self, index, col: str):
         row = self.df.loc[self.df[index.col_name] == index.current][col]
         if not row.empty:
             return row.iloc[-1]
         return False
 
 
+@dataclass
 class Symbols:
-    def __init__(self, symbols=None):
-        if symbols is None:
-            symbols = []
-        self.SYMBOLS = symbols
+    SYMBOLS: List[Symbol]
 
-    def add(self, symbol):
+    def add(self, symbol: Symbol):
         self.SYMBOLS.append(symbol)
 
-    def get(self, name):
+    def get(self, name: str):
         for s in self.SYMBOLS:
             if s.name == name:
                 return s
