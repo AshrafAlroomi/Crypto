@@ -6,7 +6,7 @@ from stocklab.vars import ORDERS
 class Simulation:
     def __init__(self, balance, strategy, indexes):
         self.strategy = strategy
-        self.state = State(balance, strategy)
+        self.state = State(balance=balance, strategy=strategy)
         self.index = Index(indexes[0], indexes[1])
         self.response = False
         self.first_index = None
@@ -41,4 +41,3 @@ class Simulation:
             "assets": self.state.get_assets,
             "profit": self.state.trades.all_profit,
         }
-

@@ -5,7 +5,7 @@ from stocklab.vars import COLS
 
 class Portfolio(object):
     df: pd.DataFrame
-    symbols: Symbols
+    symbols = Symbols()
 
     def add_symbol(self, name: str, pct: float, df: pd.DataFrame):
         s = Symbol(name=name, pct=pct, df=df)

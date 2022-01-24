@@ -1,7 +1,6 @@
 from stocklab.portfolio.symbols import Symbols, Symbol
 from stocklab.backtest.index import Index
-from pydantic.dataclasses import dataclass
-from typing import List
+from dataclasses import dataclass
 
 
 @dataclass
@@ -21,7 +20,12 @@ class Hold:
 
 @dataclass
 class Holds:
-    HOLDS: List[Hold]
+
+    def __post_init__(self):
+        self.HOLDS = []
+
+    def __iter__(self):
+        return self.HOLDS
 
     def add(self, hold):
         self.HOLDS.append(hold)

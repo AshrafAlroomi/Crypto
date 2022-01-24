@@ -1,5 +1,5 @@
 import pandas as pd
-from pydantic.dataclasses import dataclass
+from dataclasses import dataclass
 from stocklab.vars import ORDERS
 from typing import List
 from stocklab.backtest.index import Index
@@ -10,7 +10,7 @@ class Trade:
     index: Index
     order = None
     state = None
-    profit = None
+    profit = 0.0
     trade_type: str
 
     def new(self, state, order):
@@ -69,10 +69,13 @@ class Trade:
             raise ValueError
 
 
+@dataclass
 class Trades:
-    TRADES: List[Trade]
     all_profit = 0.0
     all_profit_pct = 0.0
+
+    def __post_init__(self):
+        self.TRADES = []
 
     def add(self, trade):
         self.TRADES.append(trade)

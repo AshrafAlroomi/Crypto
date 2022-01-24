@@ -1,6 +1,6 @@
 import pandas as pd
 from typing import List
-from pydantic.dataclasses import dataclass
+from dataclasses import dataclass
 
 
 @dataclass
@@ -18,7 +18,9 @@ class Symbol(object):
 
 @dataclass
 class Symbols:
-    SYMBOLS: List[Symbol]
+
+    def __post_init__(self):
+        self.SYMBOLS = []
 
     def add(self, symbol: Symbol):
         self.SYMBOLS.append(symbol)

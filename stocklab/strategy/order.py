@@ -1,20 +1,25 @@
+from dataclasses import dataclass
+from stocklab.portfolio.symbols import Symbol
+from stocklab.backtest.holds import Hold
+from typing import Optional
+
+
+@dataclass
 class Order:
-    def __init__(self, op, symbol=None, hold=None, price=0, score=0):
-        self.op = op
-        self.hold = hold
-        self.symbol = symbol
-        self.price = price
-        self.score = score
+    op: str
+    symbol: Symbol
+    hold: Optional[Hold] = None
+    price: float = 0.0
+    score: float = 0.0
 
     def get_quantity(self, balance):
         return (balance * self.symbol.pct) // self.price
 
 
+@dataclass
 class Orders:
-    def __init__(self, orders=None):
-        if orders is None:
-            orders = []
-        self.ORDERS = orders
+    def __post_init__(self):
+        self.ORDERS = []
 
     def add_order(self, order):
         # add new order
