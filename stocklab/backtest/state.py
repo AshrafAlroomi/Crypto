@@ -44,7 +44,7 @@ class State:
     @property
     def get_assets(self):
         assets = self.balance
-        for h in self.holds.HOLDS:
+        for h in self.holds:
             assets += h.cost
         return assets
 

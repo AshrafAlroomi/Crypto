@@ -25,7 +25,7 @@ class Holds:
         self.HOLDS = []
 
     def __iter__(self):
-        return self.HOLDS
+        return iter(self.HOLDS)
 
     def add(self, hold):
         self.HOLDS.append(hold)
