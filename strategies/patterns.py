@@ -71,7 +71,7 @@ class PatternStrategyByhour(BasicStrategy):
     def decision(self, state, index):
         orders = Orders()
         self.state = state
-        for hold in state.holds.HOLDS:
+        for hold in state.holds:
             price = hold.symbol.get_by_index(index, self.PRICE_SELL_INDEX)
             if price:
                 should_sell, reason = self.should_sell(hold, price, index)

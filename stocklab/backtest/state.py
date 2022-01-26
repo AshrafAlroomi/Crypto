@@ -1,16 +1,19 @@
 from stocklab.backtest.holds import Holds, Hold
 from stocklab.backtest.trades import Trades, Trade
+from stocklab.strategy.order import Order
+from stocklab.strategy.abs import Strategy
 from stocklab.vars import ORDERS
+from dataclasses import dataclass
 
 
+@dataclass
 class State:
-    def __init__(self, balance, strategy):
-        self.strategy = strategy
-        self.balance = balance
-        self.holds = Holds()
-        self.trades = Trades()
+    strategy: Strategy
+    balance: int
+    holds = Holds()
+    trades = Trades()
 
-    def sell(self, order, index):
+    def sell(self, order: Order, index):
         if self.can_sell:
             # del hold
             self.holds.drop(order.hold)
@@ -27,7 +30,7 @@ class State:
             quantity = order.get_quantity(self.balance)
             if quantity > 0:
                 # create hold
-                hold = Hold(order.symbol, quantity, order.price, index.current)
+                hold = Hold(symbol=order.symbol, quantity=quantity, unit_price=order.price, index_current=index.current)
                 self.holds.add(hold)
                 # add hold to order obj
                 order.hold = hold
@@ -41,7 +44,7 @@ class State:
     @property
     def get_assets(self):
         assets = self.balance
-        for h in self.holds.HOLDS:
+        for h in self.holds:
             assets += h.cost
         return assets
 

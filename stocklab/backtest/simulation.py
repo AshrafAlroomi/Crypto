@@ -1,15 +1,22 @@
 from stocklab.backtest.state import State
 from stocklab.backtest.index import Index
+from stocklab.strategy.abs import Strategy
 from stocklab.vars import ORDERS
+from dataclasses import dataclass
+from typing import Tuple
 
 
+@dataclass
 class Simulation:
-    def __init__(self, balance, strategy, indexes):
-        self.strategy = strategy
-        self.state = State(balance, strategy)
-        self.index = Index(indexes[0], indexes[1])
+    strategy: Strategy
+    balance: int
+    indexes: Tuple
+
+    def __post_init__(self):
         self.response = False
         self.first_index = None
+        self.state = State(balance=self.balance, strategy=self.strategy)
+        self.index = Index(self.indexes[0], self.indexes[1])
 
     @property
     def execute(self):
@@ -41,4 +48,3 @@ class Simulation:
             "assets": self.state.get_assets,
             "profit": self.state.trades.all_profit,
         }
-

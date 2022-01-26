@@ -39,3 +39,9 @@ class PatternWithIndicators(PatternStrategyByhour):
             if ema_3 > ema_2:
                 return True
         return False
+
+
+class PatternSupporter(PatternStrategyByhour):
+
+    def create_data(self, df):
+        return df

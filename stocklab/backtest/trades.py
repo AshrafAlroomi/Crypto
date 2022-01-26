@@ -1,15 +1,16 @@
 import pandas as pd
-
+from dataclasses import dataclass
 from stocklab.vars import ORDERS
+from stocklab.backtest.index import Index
 
 
+@dataclass
 class Trade:
-    def __init__(self, index, trade_type=ORDERS.buy):
-        self.index = index
-        self.order = None
-        self.state = None
-        self.profit = 0.0
-        self.trade_type = trade_type
+    index: Index
+    order = None
+    state = None
+    profit = 0.0
+    trade_type: str
 
     def new(self, state, order):
         self.state = state
@@ -67,20 +68,17 @@ class Trade:
             raise ValueError
 
 
+@dataclass
 class Trades:
-    def __init__(self, trades=None):
-        if trades is None:
-            trades = []
-        self.TRADES = trades
-        self.all_profit = 0.0
-        self.all_profit_pct = 0.0
+    all_profit = 0.0
+    all_profit_pct = 0.0
+
+    def __post_init__(self):
+        self.TRADES = []
 
     def add(self, trade):
         self.TRADES.append(trade)
         self.all_profit += trade.profit
-
-    def screen(self):
-        pass
 
     def by_index(self, index):
         if self.TRADES:

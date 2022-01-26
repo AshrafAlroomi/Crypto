@@ -1,16 +1,19 @@
 import datetime
 
 import numpy as np
+from dataclasses import dataclass
+from typing import Union
 
 
+@dataclass
 class Index(object):
-    def __init__(self, indexes, col_name):
-        assert isinstance(indexes, (list, np.ndarray))
-        assert len(indexes) > 0
-        self.row = indexes
-        self.indexes = iter(indexes)
-        self.col_name = col_name
-        self.current = None
+    indexes: Union[list, np.ndarray, iter]
+    col_name: str
+    current = None
+
+    def __post_init__(self):
+        self.row = self.indexes
+        self.indexes = iter(self.indexes)
 
     def next(self):
         try:
@@ -25,5 +28,3 @@ class Index(object):
 
     def get_period(self, start_index, end_index):
         return self.row[start_index, end_index]
-
-
