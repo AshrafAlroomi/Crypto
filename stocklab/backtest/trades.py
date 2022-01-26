@@ -1,7 +1,6 @@
 import pandas as pd
 from dataclasses import dataclass
 from stocklab.vars import ORDERS
-from typing import List
 from stocklab.backtest.index import Index
 
 
