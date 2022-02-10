@@ -3,6 +3,7 @@ from data.binance import get_symbols, read_binance_data
 from stocklab.backtest.simulation import Simulation
 from stocklab.portfolio.portfolio import Portfolio
 from strategies.period import PatternWithIndicators
+from strategies.sandr import SRStrategy
 
 if len(sys.argv) > 1 and sys.argv[1] == "user":
     symbols_dict = {k: v for k, v in enumerate(get_symbols()[::-1])}
@@ -22,7 +23,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "user":
         dates = df["date"].values
         portfolio.add_symbol(coin, pct, df)
 
-    strategy = PatternWithIndicators(portfolio=portfolio)
+    strategy = SRStrategy(portfolio=portfolio)
     sim = Simulation(balance=balance, strategy=strategy, indexes=(dates, "date"))
 else:
     balance = 1000
@@ -32,5 +33,5 @@ else:
         df = read_binance_data(coin)
         dates = df["date"].values
         portfolio.add_symbol(coin, 0.25, df)
-    strategy = PatternWithIndicators(portfolio=portfolio)
+    strategy = SRStrategy(portfolio=portfolio)
     sim = Simulation(balance=balance, strategy=strategy, indexes=(dates, "date"))
