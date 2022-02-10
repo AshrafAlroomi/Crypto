@@ -22,8 +22,12 @@ def test_one(method, s_idx, period):
     lines = method(data[s_idx:s_idx + period])
     tester = LinesTester(lines)
     tester.test(data[s_idx + period:s_idx + period * 2])
+    print("x")
 
-
+# 5.725050945094509
+# 6.620509450945095
 if __name__ == '__main__':
-    # test_all(3550, 40)
-    test_one(PeaksLines, 3550, 40)
+    # test_all(8000, 300)
+    test_one(ParLines, 9200 , 100)
+    #for i in range(0, 300, 20):
+        #test_one(ParLines, 9200 + i, 100)

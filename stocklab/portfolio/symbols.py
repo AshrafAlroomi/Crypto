@@ -31,8 +31,25 @@ class Symbols:
                 return s
         raise f"no symbols {name}"
 
+    @property
+    def names(self):
+        return [x.name for x in self.SYMBOLS]
+
     def __sub__(self, other):
-        return set(self.SYMBOLS) - set(other)
+        l = other.SYMBOLS
+        for s in self.SYMBOLS:
+            if s.name in other.names:
+                l.remove(s)
+            else:
+                l.append(s)
+        return l
+
+        return 0
+        # for s in self.SYMBOLS:
+        #     if s
+        #
+        # return [x if x not in other.SYMBOLS for x in self.SYMBOLS]
+        # return set(self.SYMBOLS) - set(other.SYMBOLS)
 
     def __iter__(self):
         return self.SYMBOLS.__iter__()

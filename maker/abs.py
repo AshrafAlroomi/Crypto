@@ -1,4 +1,5 @@
 import scipy.signal
+import math
 from maker.utils import Slope, Rel, Range
 
 
@@ -10,6 +11,12 @@ class Lines:
     def create(self) -> (Slope, Slope):
         """abstract method"""
         raise NotImplemented
+
+    @property
+    def dis(self):
+        # parallel lines
+        d = abs(self.resistance.b - self.support.b) / math.sqrt(self.resistance.m + 1)
+        return d
 
     @property
     def relation(self):

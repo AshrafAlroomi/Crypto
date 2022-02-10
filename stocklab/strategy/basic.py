@@ -42,13 +42,13 @@ class BasicStrategy(Strategy):
         for hold in state.holds:
             price = hold.symbol.get_by_index(index, self.PRICE_SELL_INDEX)
             if price:
-                if self.should_sell(hold, price):
+                if self.should_sell(hold=hold, price=price, index=index):
                     order = Order(op=ORDERS.sell, symbol=hold.symbol,
                                   hold=hold, price=price, score=1.0)
                     orders.add_order(order)
 
         for symbol in self.portfolio.symbols - self.state.holds.symbols:
-            if self.should_buy(symbol, index):
+            if self.should_buy(symbol=symbol, index=index):
                 price = symbol.get_by_index(index, self.PRICE_BUY_INDEX)
                 score = symbol.get_by_index(index, self.score_index)
                 if price:
@@ -79,7 +79,7 @@ class BasicStrategy(Strategy):
         return False
 
     def sell_fees(self, cash) -> float:
-        return cash
+        return cash - (cash * 0.01)
 
     def buy_fees(self, cash) -> float:
         return cash
