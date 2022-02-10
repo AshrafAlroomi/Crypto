@@ -2,10 +2,10 @@ from stocklab.strategy.order import Orders, Order
 from stocklab.vars import *
 from strategies.patterns import PatternStrategyByhour
 import pandas as pd
-from talib import EMA
-import talib
+# from talib import EMA
+# import talib
 
-
+EMA = None
 class PatternWithIndicators(PatternStrategyByhour):
     PATTERN_LIST = ["CDLLONGLEGGEDDOJI"]
     STOP_LOSS = -0.02

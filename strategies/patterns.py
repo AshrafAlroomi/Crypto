@@ -2,7 +2,7 @@ from stocklab.strategy.order import Orders, Order
 from stocklab.vars import *
 from stocklab.strategy.basic import BasicStrategy
 import pandas as pd
-import talib
+# import talib
 
 """
 

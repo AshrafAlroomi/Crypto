@@ -79,7 +79,7 @@ class BasicStrategy(Strategy):
         return False
 
     def sell_fees(self, cash) -> float:
-        return cash - (cash * 0.01)
+        return cash - (cash * 0.001)
 
     def buy_fees(self, cash) -> float:
         return cash

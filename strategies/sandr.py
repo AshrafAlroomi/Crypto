@@ -10,6 +10,14 @@ class SRStrategy(BasicStrategy):
     STOP_LOSS = -0.04
     TAKE_PROFIT = 0.04
 
+
+    @staticmethod
+    def line_analysis(line:ParLines,x:float):
+        s = line.support
+        r = line.resistance
+
+
+
     def create_data(self, df: pd.DataFrame):
         df["Buy"] = 0
         df["Signal"] = 0
@@ -20,27 +28,37 @@ class SRStrategy(BasicStrategy):
         llt = 0  # line live time
 
         for i in range(len(data) - self.PERIOD):
-            if line is not None:
-                support_pre = line.support.y(idx)
-                resistance_pre = line.resistance.y(idx)
+            line = ParLines(data[i:i+self.PERIOD])
+            idx += 1
+            support_pre = line.support.y(idx)
+            resistance_pre = line.resistance.y(idx)
+            support_diff = (support_pre - data[i]) / data[i]
+            resistance_diff = (data[i] - resistance_pre) / data[i]
 
-                support_diff = (support_pre - data[i]) / data[i]
-                resistance_diff = (data[i] - resistance_pre) / data[i]
-
-                llt += 1
-                if support_diff > 0.05:
-                    df.loc[i, 'Buy'] = -1
-                if resistance_diff > 0.01:
-                    line = None
-                    df.loc[i, 'Buy'] = 1
-                if llt == 20:
-                    line = None
-                else:
-                    idx += 1
-            else:
-                line = ParLines(data[i:i + self.PERIOD])
-                idx = self.PERIOD
-                llt = 0
+            """
+                for i in range(len(data) - self.PERIOD, self.PERIOD):
+                    if line is not None:
+                        support_pre = line.support.y(idx)
+                        resistance_pre = line.resistance.y(idx)
+        
+                        support_diff = (support_pre - data[i]) / data[i]
+                        resistance_diff = (data[i] - resistance_pre) / data[i]
+        
+                        llt += 1
+                        if support_diff > 0.01:
+                            df.loc[i, 'Buy'] = -1
+                        if resistance_diff > 0.01:
+                            line = None
+                            df.loc[i, 'Buy'] = 1
+                        if llt == 20:
+                            line = None
+                        else:
+                            idx += 1
+                    else:
+                        line = ParLines(data[i:i + self.PERIOD])
+                        idx = self.PERIOD
+                        llt = 0
+            """
         return df
 
     def should_buy(self, symbol, index) -> bool:
