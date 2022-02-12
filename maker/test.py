@@ -19,15 +19,18 @@ def test_all(s_idx, period):
 
 def test_one(method, s_idx, period):
     data = get_data()
-    lines = method(data[s_idx:s_idx + period])
+    xs = list(range(s_idx, s_idx + period))
+    lines = method(data[s_idx:s_idx + period], xs)
     tester = LinesTester(lines)
     tester.test(data[s_idx + period:s_idx + period * 2])
+    # tester.show()
     print("x")
+
 
 # 5.725050945094509
 # 6.620509450945095
 if __name__ == '__main__':
     # test_all(8000, 300)
-    test_one(ParLines, 9200 , 100)
-    #for i in range(0, 300, 20):
-        #test_one(ParLines, 9200 + i, 100)
+    test_one(PeaksLines, 9600, 100)
+    # for i in range(0, 300, 20):
+    # test_one(ParLines, 9200 + i, 100)

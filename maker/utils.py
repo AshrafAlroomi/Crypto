@@ -22,8 +22,8 @@ class Slope:
     m: float
     b: float
 
-    def y(self, y):
-        return self.m * y + self.b
+    def y(self, x):
+        return self.m * x + self.b
 
     @property
     def angle(self):

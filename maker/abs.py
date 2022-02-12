@@ -1,11 +1,16 @@
 import scipy.signal
 import math
+import matplotlib.pyplot as plt
 from maker.utils import Slope, Rel, Range
 
 
 class Lines:
-    def __init__(self, data: list):
+    def __init__(self, data: list, xs: list = None):
         self.d = data
+        if xs is None:
+            xs = list(range(len(data)))
+        assert len(xs) == len(data)
+        self.xs = xs
         self.support, self.resistance = self.create()
 
     def create(self) -> (Slope, Slope):
@@ -47,6 +52,15 @@ class Lines:
         if len(upper_peaks) < 1 or len(lower_peaks) < 1:
             return [], []
         return upper_peaks[0], lower_peaks[0]
+
+    def show(self):
+        """plot support,resistance and data"""
+        plt.plot(self.xs, self.d, label="data")
+        r, s = self.predict()
+        plt.plot(s, label="support")
+        plt.plot(r, label="resistance")
+        plt.legend(loc="upper left")
+        plt.show()
 
     def predict(self, length=0, xs=None):
         """create slope prediction of next data

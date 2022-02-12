@@ -58,16 +58,16 @@ class PeaksLines(Lines):
         u, d = self.peaks  # get upper and lower peaks
         ulist = [self.d[x] for x in u]  # get ys of upper peaks
         dlist = [self.d[x] for x in d]  # get ys of lower peaks
-        uline = stats.linregress(y=ulist, x=list(range(len(ulist))))  # create upper linear regression
-        dline = stats.linregress(y=dlist, x=list(range(len(dlist))))  # create lower linear regression
+        uline = stats.linregress(y=ulist, x=[self.xs[x] for x in u])  # create upper linear regression
+        dline = stats.linregress(y=dlist, x=[self.xs[x] for x in d])  # create lower linear regression
         # get min and max
         max_idx = np.argmax(self.d)
         min_idx = np.argmin(self.d)
         max_value = self.d[max_idx]
         min_value = self.d[min_idx]
         # get predictions
-        pre_max = uline.slope * max_idx + uline.intercept
-        pre_min = dline.slope * min_idx + dline.intercept
+        pre_max = uline.slope * self.xs[max_idx] + uline.intercept
+        pre_min = dline.slope * self.xs[max_idx] + dline.intercept
         # the difference between predicted and the actual
         diff_max = max_value - pre_max
         diff_min = pre_min - min_value
@@ -95,15 +95,15 @@ class ParLines(Lines):
     """
 
     def create(self):
-        l = stats.linregress(y=self.d, x=list(range(len(self.d))))  # create liner regression
+        l = stats.linregress(y=self.d, x=self.xs)  # create liner regression
         # get min and max
         max_idx = np.argmax(self.d)
         min_idx = np.argmin(self.d)
         max_value = self.d[max_idx]
         min_value = self.d[min_idx]
         # get predictions
-        pre_max = l.slope * max_idx + l.intercept
-        pre_min = l.slope * min_idx + l.intercept
+        pre_max = l.slope * self.xs[max_idx] + l.intercept
+        pre_min = l.slope * self.xs[min_idx] + l.intercept
         # the difference between predicted and the actual
         diff_max = max_value - pre_max
         diff_min = pre_min - min_value
@@ -120,8 +120,8 @@ class LinesTester:
 
     def __post_init__(self):
         # create lines data
-        self.support_data = [self.lines.support.y(i) for i in range(len(self.lines.d))]
-        self.resistance_data = [self.lines.resistance.y(i) for i in range(len(self.lines.d))]
+        self.support_data = [self.lines.support.y(i) for i in self.lines.xs]
+        self.resistance_data = [self.lines.resistance.y(i) for i in self.lines.xs]
 
     def score(self):
         # TODO
@@ -135,21 +135,23 @@ class LinesTester:
                 down_diff += abs(self.lines.d[i] - self.support_data[i])
         return self.lines.relation, up_diff, down_diff
 
-    def test(self, data):
+    def test(self, data, xs=None):
         """create new data predictions and plot"""
-        xs = [x for x in range(len(self.lines.d), len(data) + len(self.lines.d))]
-        plt.plot(self.lines.d, label="data")
-        plt.plot(self.support_data, label="support")
-        plt.plot(self.resistance_data, label="resistance")
+        if xs is None:
+            last_idx = self.lines.xs[-1]
+            xs = [x + last_idx for x in range(len(data))]
+        plt.plot(self.lines.xs, self.lines.d, label="data")
+        plt.plot(self.lines.xs, self.support_data, label="support")
+        plt.plot(self.lines.xs, self.resistance_data, label="resistance")
         plt.plot(xs, data, label="pre")
         plt.legend(loc="upper left")
         plt.show()
 
     def show(self):
         """plot support,resistance and data"""
-        plt.plot(self.lines.d, label="data")
-        plt.plot(self.support_data, label="support")
-        plt.plot(self.resistance_data, label="resistance")
+        plt.plot(self.lines.xs, self.lines.d, label="data")
+        plt.plot(self.lines.xs, self.support_data, label="support")
+        plt.plot(self.lines.xs, self.resistance_data, label="resistance")
         plt.legend(loc="upper left")
         plt.show()
 
@@ -168,5 +170,3 @@ class LinesTester:
     #             s_avg += self.support_data[i] - data_mean
     #     print(r_avg)
     #     print(s_avg)
-
-
