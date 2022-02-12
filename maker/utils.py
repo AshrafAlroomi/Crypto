@@ -32,9 +32,9 @@ class Slope:
     @property
     def dir(self):
         # direction of the slope
-        if self.angle > 2:
+        if self.angle > 0.0:
             return Dir.up
-        if self.angle < 2:
+        if self.angle < 0.0:
             return Dir.down
         return Dir.straight
 
