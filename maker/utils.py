@@ -22,8 +22,8 @@ class Slope:
     m: float
     b: float
 
-    def y(self, y):
-        return self.m * y + self.b
+    def y(self, x):
+        return self.m * x + self.b
 
     @property
     def angle(self):
@@ -32,9 +32,9 @@ class Slope:
     @property
     def dir(self):
         # direction of the slope
-        if self.angle > 2:
+        if self.angle > 0.0:
             return Dir.up
-        if self.angle < 2:
+        if self.angle < 0.0:
             return Dir.down
         return Dir.straight
 

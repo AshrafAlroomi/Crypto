@@ -5,7 +5,22 @@ from stocklab.portfolio.portfolio import Portfolio
 from strategies.period import PatternWithIndicators
 from strategies.sandr import SRStrategy
 
-if len(sys.argv) > 1 and sys.argv[1] == "user":
+method = None
+if len(sys.argv) > 1:
+    method = sys.argv[1]
+
+if method is None:
+    balance = 1000
+    coins = {0: 'LRC', 1: 'SC', 2: 'CVC', 3: 'ICX'}
+    portfolio = Portfolio()
+    for _, coin in coins.items():
+        df = read_binance_data(coin)
+        dates = df["date"].values
+        portfolio.add_symbol(coin, 0.25, df)
+    strategy = SRStrategy(portfolio=portfolio)
+    sim = Simulation(balance=balance, strategy=strategy, indexes=(dates, "date"))
+
+elif method == "user":
     symbols_dict = {k: v for k, v in enumerate(get_symbols()[::-1])}
     balance = int(input("balance default(1000): ") or "1000")
     print(symbols_dict)
@@ -25,11 +40,11 @@ if len(sys.argv) > 1 and sys.argv[1] == "user":
 
     strategy = SRStrategy(portfolio=portfolio)
     sim = Simulation(balance=balance, strategy=strategy, indexes=(dates, "date"))
-else:
+elif method == "all":
     balance = 1000
-    coins = {0: 'LRC', 1: 'SC', 2: 'CVC', 3: 'ICX'}
+    coins = get_symbols()
     portfolio = Portfolio()
-    for _, coin in coins.items():
+    for coin in coins:
         df = read_binance_data(coin)
         dates = df["date"].values
         portfolio.add_symbol(coin, 0.25, df)
